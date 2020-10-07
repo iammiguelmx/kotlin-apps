@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "462218333551",
+    "firebase_url": "https://twitter-d2cff.firebaseio.com",
+    "project_id": "twitter-d2cff",
+    "storage_bucket": "twitter-d2cff.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:462218333551:android:95d7f28c326eedb1002c9a",
+        "android_client_info": {
+          "package_name": "com.mx.twitter"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "462218333551-enrctic1r2f0ggtif1uiuu8bvmtlqh56.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBl9sp2IpRk7H8iKiYYSZ1JkSpIBItku-s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "462218333551-enrctic1r2f0ggtif1uiuu8bvmtlqh56.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
