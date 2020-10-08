@@ -2,10 +2,8 @@ package com.mx.twitter
 
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.drawable.BitmapDrawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
@@ -13,15 +11,20 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.Toast
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
-import kotlinx.android.synthetic.main.activity_login.*
+import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.add_ticket.view.*
+import kotlinx.android.synthetic.main.tweets_ticket.view.*
 import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 
 class MainActivity : AppCompatActivity() {
@@ -43,15 +46,12 @@ class MainActivity : AppCompatActivity() {
         UserUID=b.getString("uid")
         //Dummy data
         ListTweets.add(Ticket("0","him","url","add"))
-        ListTweets.add(Ticket("0","him","url","hussein"))
-
-
-        ListTweets.add(Ticket("0","him","url","add"))
-        ListTweets.add(Ticket("0","him","url","hussein"))
 
 
          adapter=MyTweetAdpater(this,ListTweets)
         lvTweets.adapter=adapter
+
+        LoadPost()
     }
 
     inner class  MyTweetAdpater: BaseAdapter {
@@ -65,9 +65,9 @@ class MainActivity : AppCompatActivity() {
 
 
         override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
-            var myView = listNotesAdpater[position]
+            var mytweet = listNotesAdpater[position]
 
-            if (myView.tweetPersonUID.equals("add")) {
+            if (mytweet.tweetPersonUID.equals("add")) {
                 var myView = layoutInflater.inflate(R.layout.add_ticket, null)
                 myView.iv_attach.setOnClickListener(
                     View.OnClickListener {
@@ -76,18 +76,51 @@ class MainActivity : AppCompatActivity() {
 
                 myView.iv_post.setOnClickListener(
                     View.OnClickListener {
-                        //uploas server
-
-                        myRef.child("posts").setValue(
+                        //upload server
+                        myRef.child("posts").push().setValue(
                             PostInfo(UserUID!!,
-                            myView.etPost.text.toString(),DownloadURL!!))
+                                myView.etPost.text.toString(), DownloadURL!!))
                         myView.etPost.setText("")
                     })
+
                 return myView
             } else {
                 //Load tweet
                 //TODO: work
                 var myView = layoutInflater.inflate(R.layout.tweets_ticket, null)
+                myView.txt_tweet.setText(mytweet.tweetText)
+
+                //myView.tweet_picture.setImageURI(mytweet.tweetImageURL)
+                Picasso.with(context).load(mytweet.tweetImageURL).into(myView.tweet_picture)
+
+                myRef.child("Users").child(mytweet.tweetPersonUID!!)
+                    .addValueEventListener(object :ValueEventListener{
+
+                        override fun onDataChange(dataSnapshot: DataSnapshot) {
+
+                            try {
+
+                                var td= dataSnapshot!!.value as HashMap<String,Any>
+
+                                for(key in td.keys){
+                                    var userInfo= td[key] as String
+                                    if (userInfo.equals("ProfileImage")){
+                                        Picasso.with(context).load(userInfo).into(myView.picture_path)
+
+                                    }else{
+                                        myView.txtUserName.setText(userInfo)
+                                    }
+
+                                }
+                            }catch (ex:Exception){}
+
+
+                        }
+
+                        override fun onCancelled(error: DatabaseError) {
+                        }
+                    })
+
                 return myView
             }
         }
@@ -159,6 +192,36 @@ class MainActivity : AppCompatActivity() {
     fun SplitString(email:String):String{
         val split= email.split("@")
         return split[0]
+    }
+
+    fun LoadPost(){
+        myRef.child("posts")
+            .addValueEventListener(object :ValueEventListener{
+
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+
+                    try {
+                        ListTweets.clear()
+                        ListTweets.add(Ticket("0","him","url","add"))
+                        ListTweets.add(Ticket("0","him","url","ads"))
+                        var td= dataSnapshot!!.value as HashMap<String,Any>
+
+                        for(key in td.keys){
+                            var post= td[key] as HashMap<String,Any>
+                            ListTweets.add(Ticket(key,
+                                post["text"] as String,
+                                post["postImage"] as String,
+                                post["userUID"] as String))
+                        }
+                        adapter!!.notifyDataSetChanged()
+                    }catch (ex:Exception){}
+
+
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                }
+            })
     }
 
 }

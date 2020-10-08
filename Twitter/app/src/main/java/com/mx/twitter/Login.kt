@@ -84,7 +84,9 @@ class Login : AppCompatActivity() {
 
         }.addOnSuccessListener {taskSnapshot ->
 
-            var downloadURL = taskSnapshot.getMetadata()!!.getReference()!!.getDownloadUrl().toString()
+            var downloadURL= taskSnapshot.storage.downloadUrl.toString()!!
+
+           // var downloadURL = taskSnapshot.getMetadata()!!.getReference()!!.getDownloadUrl().toString()
 
             myRef.child("User").child(currentUser.uid).child("email").setValue(currentUser.email)
             myRef.child("User").child(currentUser.uid).child("ProfileImage").setValue(downloadURL)
@@ -173,7 +175,7 @@ class Login : AppCompatActivity() {
 
     //Method for Login
     fun buLogin(view:View) {
-        LoginToFireBase(etEmail.text.toString(),etPassword.text.toString())
+        LoginToFireBase(etEmail.text.toString(),etEmail.text.toString())
     }
 
 }//end class
